@@ -14,7 +14,7 @@ QuickFeed is a super fast HTML only RSS/ATOM reader. Uses FastAPI and Sqlite ser
 
 1. I wanted an RSS feed reader that could double as a homepage and load quickly when a new tab was open. I didn't find anything that could respond within realtime (less than 100ms), so I built one.
 
-2. I also haven't found an dead-simple RSS reader that I've been happy with since Google Reader's retirment.
+2. I wanted a dead simple RSS feed akin to early google reader.
 
 
 ## Running it
