@@ -153,7 +153,8 @@ def add_feed_post(request: Request, uri: T.Annotated[str, Form()]):
             feed_url=uri,
             site_url=feed.feed.link,
             title=feed.feed.title,
-            description=feed.feed.description)
+            description=feed.feed.description if hasattr(feed.feed, "description") else ""
+        )
     reload_time = request.app.state.config["reload_time_after_new_feed_submit"]
     return request.app.state.templates.TemplateResponse(
         request=request,

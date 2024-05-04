@@ -35,7 +35,6 @@ class ColorfulFormatter(logging.Formatter):
 def setup_database(sqlalchemy_database_url: str):
     engine = create_engine(sqlalchemy_database_url)
     local_session_maker = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    models.Base.metadata.create_all(bind=engine)
     return local_session_maker
 
 
