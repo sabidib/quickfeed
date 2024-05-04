@@ -29,6 +29,7 @@ def feed_page(request: Request, page: T.Optional[int] = 1, per_page: T.Optional[
         ]
         feeds = [
             {
+                "id": feed.id,
                 "title": feed.title,
                 "url": feed.site_url,
                 "feed_last_updated": feed.feed_last_updated,
@@ -190,9 +191,20 @@ def feeds_page(request: Request):
 
 
 @router.get("/feed_details", response_class=HTMLResponse)
-def feed_details(request: Request, feed_id: int):
+def feed_details(request: Request, feed_id: str):
     with request.app.state.sesion_maker() as session:
         feed = api.get_feed_by_id(session, feed_id)
+        feeds = [
+            {
+                "title": feed.title,
+                "site_url": feed.site_url,
+                "feed_url": feed.feed_url,
+                "feed_last_updated": feed.feed_last_updated,
+                "description": feed.description,
+                "id": feed.id
+            }
+            for feed in sorted(api.get_feeds(session), key=lambda x: x.title)
+        ]
         if feed is not None:
             articles = [
                 {
@@ -217,6 +229,7 @@ def feed_details(request: Request, feed_id: int):
                         "id": feed.id,
                         "added_at": feed.added_at
                     },
+                    "feeds": feeds,
                     "articles": articles
                 }
             )
@@ -226,6 +239,7 @@ def feed_details(request: Request, feed_id: int):
                 name="feed_details.html",
                 context={
                     "feed": None,
+                    "feeds": feeds,
                     "articles": []
                 }
             )
