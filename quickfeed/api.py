@@ -9,7 +9,30 @@ from quickfeed import models
 
 def get_feeds(session: Session):
     stmt = select(models.Feed)
-    yield from session.scalars(stmt)
+    return session.scalars(stmt).all()
+
+def get_feed_by_uri(session: Session, feed_url: str):
+    stmt = select(models.Feed).filter(models.Feed.feed_url == feed_url)
+    return session.scalars(stmt).one_or_none()
+
+def get_feed_by_id(session: Session, feed_id: str):
+    stmt = select(models.Feed).filter(models.Feed.id == feed_id)
+    return session.scalars(stmt).one_or_none()
+
+def delete_article_by_id(session: Session, article_id: str):
+    stmt = select(models.Article).filter(models.Article.id == article_id)
+    article = session.scalars(stmt).one()
+    session.delete(article)
+
+def delete_feed_and_articles_by_id(session: Session, feed_id: str) -> bool:
+    stmt = select(models.Feed).filter(models.Feed.id == feed_id)
+    feed = session.scalars(stmt).one_or_none()
+    if feed is None:
+        return False
+    for article in feed.articles:
+        delete_article_by_id(session, article.id)
+    session.delete(feed)
+    return True
 
 
 def get_feed_data(feed_url: str):

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% include 'head.html' %}
+<body>
+    <div class="container">
+        <div class="row mt-4">
+            {% include 'sidebar.html' %}
+
+            <div class="col">
+                <div class="row">
+                    <div class="col">
+                        <div class="container">
+                            <div class="row">
+                                <h2 class="text-xl font-semibold mb-6">Add Feed</h2>
+                                {% if error %}
+                                    <div class="alert alert-danger" role="alert">
+                                        <strong class="font-bold">Error:</strong>
+                                        <span class="block sm:inline">{{ error }}</span>
+                                    </div>
+                                {% endif %}
+                                {% if success %}
+                                    <div class="alert alert-success" role="alert">
+                                        <strong class="font-bold">Success:</strong>
+                                        <span class="block sm:inline">{{ success }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="row">
+                                {% if feed %}
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col">
+                                            <table class="table">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Feed Site</td>
+                                                        <td>{{feed.title}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Feed URL</td>
+                                                        <td><a href="{{ feed.url }}">{{feed.url}}</a></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Feed Description</td>
+                                                        <td>{{feed.description}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Feed Category</td>
+                                                        <td>Not set</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            Added
+                                                        </td>
+                                                        <td>
+                                                            {{feed.added_at.strftime('%Y-%m-%dT%H:%M:%S')}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            Last Updated
+                                                        </td>
+                                                        <td>
+                                                            {{feed.feed_last_updated.strftime('%Y-%m-%dT%H:%M:%S')}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <a href="/articles?feed_id={{ feed.id }}">Articles</a>
+                                                        </td>
+                                                        <td></td>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <p class="block text-sm font-medium text-gray-700">
+                                            Are you sure you want to delete this feed?
+                                            This will also delete all articles associated with this feed.
+                                        </p>
+                                    </div>
+                                    <form action="/delete_feed_process" method="post">
+                                        <button
+                                            type="submit"
+                                            value="{{ feed.id }}"
+                                            name="feed_id">Yes, delete this feed and all associated articles.</button>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col">
+                                            <p>Could not find feed</p>
+                                            <a href="/feeds">Back to feeds</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+

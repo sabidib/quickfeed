@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% include 'head.html' %}
+    {% if success %}
+        <meta http-equiv="refresh" content="{{ reload_time }};url=/reload_feed">
+    {% endif %}
+<body>
+    <div class="container">
+        <div class="row mt-4">
+            {% include 'sidebar.html' %}
+
+            <div class="col">
+                <div class="row">
+                    <div class="col">
+                        <a href="/feeds" class="no-highlight-link"><h2>Feeds</h2></a>
+                    </div>
+                    <div class="col-1">
+                        <a href="/add_feed" class="no-highlight-link"><h2>+</h2></a>
+                    </div>
+                </div>
+                <div class="row">
+
+                </div>
+                <div class="row">
+                    <div class="container">
+                        <table class="table">
+                            <!-- Table Header -->
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 15%">Feed Site</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col" style="width: 15%;">Category</th>
+                                    <th scope="col" style="width: 5%;">Details</th>
+                                    <th scope="col" style="width: 5%;">Delete</th>
+                                </tr>
+                            </thead>
+                            <!-- Table Body -->
+                            <tbody>
+                                {% for feed in feeds %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ feed.url }}">
+                                            <span>{{ feed.title | truncate(70) }}</span>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span>{{ feed.description }}</span>
+                                    </td>
+                                    <td>
+                                        Not set
+                                    </td>
+                                    <td>
+                                        <a href="/feed_details?feed_id={{ feed.id }}">Details</a>
+                                    </td>
+                                    <td>
+                                        <a href="/delete_feed?feed_id={{ feed.id }}">Delete</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

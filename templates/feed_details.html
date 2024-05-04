@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% include 'head.html' %}
+    {% if success %}
+        <meta http-equiv="refresh" content="{{ reload_time }};url=/reload_feed">
+    {% endif %}
+<body>
+    <div class="container">
+        <div class="row mt-4">
+            {% include 'sidebar.html' %}
+            {% if feed %}
+            <div class="col">
+                <div class="row">
+                    <div class="col">
+                        <h2>{{ feed.title }}</h2>
+                    </div>
+                </div>
+                <!-- Feed Details -->
+                <div class="row">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <td>Feed Site</td>
+                                            <td>{{feed.title}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Feed URL</td>
+                                            <td><a href="{{ feed.feed_url }}">{{ feed.feed_url }}</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Site URL</td>
+                                            <td><a href="{{ feed.site_url }}">{{ feed.site_url }}</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Feed Description</td>
+                                            <td>{{feed.description}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Feed Category</td>
+                                            <td>Not set</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Added
+                                            </td>
+                                            <td>
+                                                {{feed.added_at.strftime('%Y-%m-%dT%H:%M:%S')}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Last Updated
+                                            </td>
+                                            <td>
+                                                {{feed.feed_last_updated.strftime('%Y-%m-%dT%H:%M:%S')}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <a href="/articles?feed_id={{ feed.id }}">Articles</a>
+                                            </td>
+                                            <td></td>
+                                        <tr>
+                                            <td>
+                                                <a href="/delete_feed?feed_id={{ feed.id }}">Delete</a>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col">
+                <div class="row">
+                    <div class="col">
+                        <h2>Feed not found</h2>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

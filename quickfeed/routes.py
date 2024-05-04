@@ -93,6 +93,42 @@ def redirect(request: Request, background_tasks: BackgroundTasks, article_id: st
 def add_feed_get(request: Request,):
     return request.app.state.templates.TemplateResponse("add_feed.html", {"request": {}})
 
+@router.post("/delete_feed_process")
+def delete_feed(request: Request, feed_id: T.Annotated[str, Form()]):
+    with request.app.state.sesion_maker() as session:
+        if api.delete_feed_and_articles_by_id(session, feed_id):
+            message = "Feed deleted successfully"
+            session.commit()
+            return RedirectResponse(
+                url=f"/delete_feed?success={message}",
+                status_code=303,
+            )
+        else:
+            message = "Feed not found"
+            session.rollback()
+            return RedirectResponse(
+                url=f"/delete_feed?error={message}",
+                status_code=303,
+            )
+
+
+@router.get("/delete_feed")
+def delete_feed_get(request: Request,
+                    feed_id: T.Optional[int] = None,
+                    success: T.Optional[str] = None,
+                    error: T.Optional[str] = None):
+    with request.app.state.sesion_maker() as session:
+        feed = api.get_feed_by_id(session, feed_id)
+        return request.app.state.templates.TemplateResponse(
+            request=request,
+            name="delete_feed.html",
+            context={
+                 "success": success,
+                 "error": error,
+                 "feed": feed
+             }
+        )
+
 
 @router.post("/add_feed", response_class=HTMLResponse)
 def add_feed_post(request: Request, uri: T.Annotated[str, Form()]):
@@ -102,6 +138,15 @@ def add_feed_post(request: Request, uri: T.Annotated[str, Form()]):
                                                             "error": "No entries found in feed"})
 
     with request.app.state.sesion_maker() as session:
+        if api.get_feed_by_uri(session, uri):
+            return request.app.state.templates.TemplateResponse(
+                request=request,
+                name="add_feed.html",
+                context={
+                    "error": "Feed already added"
+                }
+            )
+
         api.add_feed(
             session,
             feed_url=uri,
@@ -117,3 +162,72 @@ def add_feed_post(request: Request, uri: T.Annotated[str, Form()]):
             "reload_time": reload_time
         }
     )
+
+
+
+
+@router.get("/feeds", response_class=HTMLResponse)
+def feeds_page(request: Request):
+    with request.app.state.sesion_maker() as session:
+        feeds = [
+            {
+                "title": feed.title,
+                "site_url": feed.site_url,
+                "feed_url": feed.feed_url,
+                "feed_last_updated": feed.feed_last_updated,
+                "description": feed.description,
+                "id": feed.id
+            }
+            for feed in sorted(api.get_feeds(session), key=lambda x: x.title)
+        ]
+    return request.app.state.templates.TemplateResponse(
+        request=request,
+        name="feeds.html",
+        context={
+            "feeds": feeds
+        }
+    )
+
+
+@router.get("/feed_details", response_class=HTMLResponse)
+def feed_details(request: Request, feed_id: int):
+    with request.app.state.sesion_maker() as session:
+        feed = api.get_feed_by_id(session, feed_id)
+        if feed is not None:
+            articles = [
+                {
+                    "title": article.title,
+                    "link": article.link,
+                    "published_at": article.published_at,
+                    "read_at": article.read_at,
+                    "id": article.id
+                }
+                for article in api.sort_articles(feed.articles)
+            ]
+            return request.app.state.templates.TemplateResponse(
+                request=request,
+                name="feed_details.html",
+                context={
+                    "feed": {
+                        "title": feed.title,
+                        "site_url": feed.site_url,
+                        "feed_url": feed.feed_url,
+                        "feed_last_updated": feed.feed_last_updated,
+                        "description": feed.description,
+                        "id": feed.id,
+                        "added_at": feed.added_at
+                    },
+                    "articles": articles
+                }
+            )
+        else:
+            return request.app.state.templates.TemplateResponse(
+                request=request,
+                name="feed_details.html",
+                context={
+                    "feed": None,
+                    "articles": []
+                }
+            )
+
+
