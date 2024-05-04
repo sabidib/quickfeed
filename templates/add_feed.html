@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% include 'head.html' %}
+    {% if success %}
+        <meta http-equiv="refresh" content="{{ reload_time }};url=/reload_feed">
+    {% endif %}
+<body>
+    <div class="container">
+        <div class="row mt-4">
+            {% include 'sidebar.html' %}
+
+            <div class="col">
+                <div class="row">
+                    <div class="col-4">
+                        <h2 class="text-xl font-semibold mb-6">Add Feed</h2>
+                        {% if error %}
+                            <div class="alert alert-danger" role="alert">
+                                <strong class="font-bold">Error:</strong>
+                                <span class="block sm:inline">{{ error }}</span>
+                            </div>
+                        {% endif %}
+                        {% if success %}
+                            <div class="alert alert-success" role="alert">
+                                <strong class="font-bold">Success:</strong>
+                                <span class="block sm:inline">{{ success }}</span>
+                            </div>
+                        {% endif %}
+                        <form id="addFeedForm" class="space-y-4" method="post">
+                            <div class="row">
+                                <div class="col">
+                                    <label for="uri" class="block text-sm font-medium text-gray-700">URI:</label>
+                                    <input type="text" id="uri" name="uri" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter feed URI">
+                                    </div>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col">
+                                    <button type="submit" action="/add_feed" formmethod="post" >Submit and refresh feeds</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

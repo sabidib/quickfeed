@@ -1,0 +1,4 @@
+#!/bin/bash
+
+DEFAULT="quickfeed scripts/"
+pylint --rcfile=.pylintrc --msg-template="{path}:{line}:{column} {msg_id}({symbol}) {msg}" ${@:-$DEFAULT}

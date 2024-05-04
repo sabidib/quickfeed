@@ -1,0 +1,19 @@
+.unread-item {
+    background-color: #e3f2fd; 
+    border-left: 4px solid #2196f3;
+    color: black;
+}
+
+.read-item {
+    background-color: #ffffff;
+    border-left: 4px solid transparent;
+    color: #666;
+}
+
+.no-highlight-link {
+  text-decoration: none;
+}
+
+.per-page-input {
+  width: 4em;
+}

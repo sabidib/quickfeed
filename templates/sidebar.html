@@ -1,0 +1,30 @@
+<div class="col-2">
+    <div class="container">
+        <div class="row">
+            <a href="/feed" class="no-highlight-link"><h2>QuickFeed</h2></a>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h4>Feeds</h4>
+            </div>
+            <div class="col-1">
+                <h4><a href="/add_feed" class="no-highlight-link">+</a></h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="container">
+                {% for feed in feeds %}
+                <div class="row">
+                    <div class="col-1"></div>
+                    <div class="col">
+                        <a href="{{ feed.url }}">
+                            <span>{{ feed.title }}</span>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+

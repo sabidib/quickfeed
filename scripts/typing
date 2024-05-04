@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DEFAULT="quickfeed/ scripts/"
+
+mypy --ignore-missing-imports ${@:-$DEFAULT}

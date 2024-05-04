@@ -1,0 +1,8 @@
+{
+  "database_url": "sqlite:///main.db",
+  "user_login": {
+    "username": "admin",
+    "password": "admin"
+  },
+  "reload_time_after_new_feed_submit": 3
+}
