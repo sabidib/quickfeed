@@ -18,6 +18,7 @@ class Category(ModelMixin):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     description = Column(String, nullable=False)
+    feeds = relationship('Feed', backref='category')
 
 
 # Models for an RSS feed reader
