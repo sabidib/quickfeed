@@ -36,7 +36,7 @@ def upgrade() -> None:
     sa.Column('description', sa.String(), nullable=False),
     sa.Column('added_at', sa.DateTime(), nullable=False),
     sa.Column('feed_last_updated', sa.DateTime(), nullable=True),
-    sa.Column('category_id', sa.Integer(), nullable=True),
+    sa.Column('category_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['category_id'], ['category.id'], ),

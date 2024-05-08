@@ -8,7 +8,6 @@ Base = declarative_base()
 
 class ModelMixin(Base):
     __abstract__ = True
-    id = Column(Integer, primary_key=True)
     created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
@@ -19,6 +18,7 @@ class Category(ModelMixin):
     name = Column(String, nullable=False)
     description = Column(String, nullable=False)
     feeds = relationship('Feed', backref='category')
+    order_number = Column(Integer, nullable=False)
 
 
 # Models for an RSS feed reader
@@ -31,7 +31,7 @@ class Feed(ModelMixin):
     description = Column(String, nullable=False)
     added_at = Column(DateTime, nullable=False)
     feed_last_updated = Column(DateTime, nullable=True)
-    category_id = Column(Integer, ForeignKey('category.id'))
+    category_id = Column(Integer, ForeignKey('category.id'), nullable=False)
 
 
 class Article(ModelMixin):

@@ -34,10 +34,25 @@ def delete_feed_and_articles_by_id(session: Session, feed_id: str) -> bool:
     session.delete(feed)
     return True
 
+def get_last_updated(session: Session):
+    stmt = select(models.Feed).order_by(models.Feed.feed_last_updated.desc()).limit(1)
+    return session.scalars(stmt).first()
+
+def get_default_category(session: Session):
+    stmt = select(models.Category).filter(models.Category.name == 'Default')
+    return session.scalars(stmt).one_or_none()
 
 def get_feed_data(feed_url: str):
     feed = feedparser.parse(feed_url)
     return feed
+
+def get_feed_articles(session: Session, feed_id: int):
+    stmt = select(models.Article).filter(models.Article.feed_id == feed_id)
+    return session.scalars(stmt).all()
+
+def get_feeds_by_category_name(session: Session, category_name: str):
+    stmt = select(models.Feed).join(models.Category).filter(models.Category.name == category_name)
+    return session.scalars(stmt).all()
 
 
 def add_article(
@@ -103,14 +118,30 @@ def update_read(db: Session, article_id: str):
     db.commit()
 
 
-def add_feed(db: Session, feed_url: str, site_url: str, title: str, description: str):
+def add_feed(db: Session, feed_url: str, site_url: str, title: str, description: str, category_id: int = None):
     feed = models.Feed(feed_url=feed_url,
                        site_url=site_url,
                        title=title,
                        description=description,
-                       added_at=datetime.datetime.now())
+                       added_at=datetime.datetime.now(),
+                       category_id=category_id
+                       )
     db.add(feed)
-    db.commit()
+    return feed
+
+def add_category(db: Session, name: str, description: str, order_number: int):
+    category = models.Category(name=name, description=description, order_number=order_number)
+    db.add(category)
+    return category
+
+def get_category_by_name(db: Session, name: str):
+    stmt = select(models.Category).filter(models.Category.name == name)
+    return db.scalars(stmt).one_or_none()
+
+def add_feed_to_category(db: Session, feed_id: int, category: models.Category):
+    feed_stmt = select(models.Feed).filter(models.Feed.id == feed_id)
+    feed = db.scalars(feed_stmt).one()
+    feed.category = category
     return feed
 
 
@@ -120,3 +151,7 @@ def remove_feed(db: Session, feed_id: int):
     db.delete(feed)
     db.commit()
     return feed
+
+def get_categories(db: Session):
+    stmt = select(models.Category)
+    return db.scalars(stmt).all()

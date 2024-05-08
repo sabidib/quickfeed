@@ -61,7 +61,7 @@
                                                             Last Updated
                                                         </td>
                                                         <td>
-                                                            {{feed.feed_last_updated.strftime('%Y-%m-%dT%H:%M:%S')}}
+                                                            {{feed.feed_last_updated.strftime('%Y-%m-%dT%H:%M:%S') if feed.feed_last_updated else 'Not Synced'}}
                                                         </td>
                                                     </tr>
                                                     <tr>

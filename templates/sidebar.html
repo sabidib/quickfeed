@@ -5,7 +5,7 @@
         </div>
         <div class="row">
             <div class="col">
-                <h4><a href="/feeds" class="no-highlight-link">Feeds</a></h4>
+                <h4><a href="/feeds" class="no-highlight-link">All Feeds</a></h4>
             </div>
             <div class="col-1">
                 <h4><a href="/add_feed" class="no-highlight-link">+</a></h4>
@@ -13,15 +13,26 @@
         </div>
         <div class="row">
             <div class="container">
-                {% for feed in feeds %}
-                <div class="row">
-                    <div class="col-1"></div>
-                    <div class="col">
-                        <a href="/feed_details?feed_id={{ feed.id }}">
-                            <span>{{ feed.title }}</span>
-                        </a>
+                {% for category_name, category_feeds in sidebar.categories %}
+                    <div class="row">
+                        <div class="col">
+                            <a href="/feed/{{ category_name }}" class="no-highlight-link">
+                                <h4>{{ category_name }}</h4>
+                            </a>
+                        </div>
+                        <div class="col-1">
+                        </div>
                     </div>
-                </div>
+                    {% for feed in category_feeds %}
+                        <div class="row">
+                            <div class="col-1"></div>
+                            <div class="col">
+                                <a href="/feed_details?feed_id={{ feed.id }}">
+                                    <span>{{ feed.title }}</span>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
                 {% endfor %}
             </div>
         </div>
