@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% include 'head.html' %}
+<body>
+    <div class="container">
+        <div class="row mt-4">
+            {% include 'sidebar.html' %}
+
+            <div class="col">
+                <div class="row">
+                    <div class="col">
+                        <a href="/Categories" class="no-highlight-link"><h2>Categories</h2></a>
+                    </div>
+                    <div class="col-1">
+                        <a href="/add_category" class="no-highlight-link"><h2>+</h2></a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="container">
+                        <table class="table">
+                            <!-- Table Header -->
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 15%">Category Name</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col" style="width: 5%;">Order</th>
+                                    <th scope="col" style="width: 5%;">Details</th>
+                                    <th scope="col" style="width: 5%;">Delete</th>
+                                </tr>
+                            </thead>
+                            <!-- Table Body -->
+                            <tbody>
+                                {% for category in categories %}
+                                <tr>
+                                    <td>
+                                        <span>{{ category.name | truncate(70) }}</span>
+                                    </td>
+                                    <td>
+                                        <span>{{ category.description | truncate(80)}}</span>
+                                    </td>
+                                    <td>
+                                        <span>{{ category.order_number }}</span>
+                                    </td>
+                                    <td>
+                                        <a href="/category_details?category_id={{ category.id }}">Details</a>
+                                    </td>
+                                    <td>
+                                        <a href="/delete_category?category_id={{ category.id }}">Delete</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+

@@ -8,14 +8,14 @@
     <div class="container">
         <div class="row mt-4">
             {% include 'sidebar.html' %}
-            {% if feed %}
+            {% if category %}
             <div class="col">
                 <div class="row">
                     <div class="col">
-                        <h2>{{ feed.title }}</h2>
+                        <h2>{{ category.name }}</h2>
                     </div>
                 </div>
-                <!-- Feed Details -->
+                <!-- Category Details -->
                 <div class="row">
                     <div class="container">
                         {% if error %}
@@ -30,37 +30,27 @@
                                 <span class="block sm:inline">{{ success }}</span>
                             </div>
                         {% endif %}
-                        <form method="post" id="update_feed" action="/update_feed" formmethod="post">
+                        <form method="post" id="update_category" action="/update_category" formmethod="post">
                             <div class="row">
                                 <div class="col">
                                     <table class="table">
                                         <tbody>
                                             <tr>
-                                                <td>Feed Site</td>
-                                                <td>{{feed.title}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Feed URL</td>
-                                                <td><a href="{{ feed.feed_url }}">{{ feed.feed_url }}</a></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Site URL</td>
-                                                <td><a href="{{ feed.site_url }}">{{ feed.site_url }}</a></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Feed Description</td>
-                                                <td>{{feed.description}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Feed Category</td>
+                                                <td>Category Name</td>
                                                 <td>
-                                                    <!-- A form that allows the user to pick a new category from a list of categories for this feed to be set to. The submit button is at the end of the page. -->
-                                                        <select name="category_id" form="update_feed">
-                                                            {% for category in categories %}
-                                                                <option value="{{ category.id }}" {% if category.name == feed.category %} selected {% endif %}>{{ category.name }}</option>
-                                                            {% endfor %}
-                                                        </select>
-                                                        <input type="hidden" name="feed_id" value="{{ feed.id }}">
+                                                    <input required='true' type="text" name="name" value="{{ category.name }}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Category Description</td>
+                                                <td>
+                                                    <textarea name="description">{{ category.description }}</textarea>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Category Order Number</td>
+                                                <td>
+                                                    <input required='true' type="number" name="order_number" value="{{ category.order_number }}"/>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -68,7 +58,7 @@
                                                     Added
                                                 </td>
                                                 <td>
-                                                    {{feed.added_at.strftime('%Y-%m-%dT%H:%M:%S')}}
+                                                    {{category.created_at.strftime('%Y-%m-%dT%H:%M:%S')}}
                                                 </td>
                                             </tr>
                                             <tr>
@@ -76,31 +66,32 @@
                                                     Last Updated
                                                 </td>
                                                 <td>
-                                                    {{feed.feed_last_updated.strftime('%Y-%m-%dT%H:%M:%S') if feed.feed_last_updated else 'Not Synced'}}
+                                                    {{ category.updated_at.strftime('%Y-%m-%dT%H:%M:%S') }}
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <a href="/articles?feed_id={{ feed.id }}">Articles</a>
+                                                    <a href="/feeds?category={{ category.id }}">Feeds</a>
                                                 </td>
                                                 <td></td>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
+                            <input type="hidden" name="category_id" value="{{ category.id }}">
                         </form>
                         <div class="row">
                             <div class="col-3">
                                 <div class="container">
                                     <div class="row">
                                         <div class="col">
-                                            <button type="submit" form="update_feed" >
+                                            <button type="submit" form="update_category">
                                                 Save
                                             </button>
                                         </div>
                                         <div class="col">
-                                            <form action="/delete_feed" formmethod="get">
-                                                <input type="hidden" name="feed_id" value="{{ feed.id }}">
+                                            <form action="/delete_category" formmethod="get">
+                                                <input type="hidden" name="feed_id" value="{{ category.id }}">
                                                 <button type="submit">Delete</button>
                                             </form>
                                        </div>
@@ -115,7 +106,7 @@
             <div class="col">
                 <div class="row">
                     <div class="col">
-                        <h2>Feed not found</h2>
+                        <h2>Category not found</h2>
                     </div>
                 </div>
             {% endif %}

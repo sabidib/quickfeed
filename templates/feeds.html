@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
     {% include 'head.html' %}
-    {% if success %}
-        <meta http-equiv="refresh" content="{{ reload_time }};url=/reload_feed">
-    {% endif %}
 <body>
     <div class="container">
         <div class="row mt-4">
@@ -19,7 +16,18 @@
                     </div>
                 </div>
                 <div class="row">
-
+                    {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                            <strong class="font-bold">Error:</strong>
+                            <span class="block sm:inline">{{ error }}</span>
+                        </div>
+                    {% endif %}
+                    {% if success %}
+                        <div class="alert alert-success" role="alert">
+                            <strong class="font-bold">Success:</strong>
+                            <span class="block sm:inline">{{ success }}</span>
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="row">
                     <div class="container">
@@ -35,30 +43,43 @@
                                 </tr>
                             </thead>
                             <!-- Table Body -->
-                            <tbody>
-                                {% for feed in feeds %}
-                                <tr>
-                                    <td>
-                                        <a href="{{ feed.site_url }}">
-                                            <span>{{ feed.title | truncate(70) }}</span>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <span>{{ feed.description }}</span>
-                                    </td>
-                                    <td>
-                                        {{ feed.category }}
-                                    </td>
-                                    <td>
-                                        <a href="/feed_details?feed_id={{ feed.id }}">Details</a>
-                                    </td>
-                                    <td>
-                                        <a href="/delete_feed?feed_id={{ feed.id }}">Delete</a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
+                            <form id="update_feeds" action="/update_feeds" method="post">
+                                <tbody>
+                                    {% for feed in feeds %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ feed.site_url }}">
+                                                <span>{{ feed.title | truncate(70) }}</span>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span>{{ feed.description }}</span>
+                                        </td>
+                                        <td>
+                                            <select name="category_id_{{ feed.id }}" form="update_feeds">
+                                                {% for category in categories %}
+                                                    <option value="{{ category.id }}" {% if category.name == feed.category %} selected {% endif %}>{{ category.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <a href="/feed_details?feed_id={{ feed.id }}">Details</a>
+                                        </td>
+                                        <td>
+                                            <a href="/delete_feed?feed_id={{ feed.id }}">Delete</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </form>
                         </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-9">
+                    </div>
+                    <div class="col">
+                        <button type="submit" form="update_feeds">Update</button>
                     </div>
                 </div>
             </div>

@@ -54,6 +54,11 @@ def get_feeds_by_category_name(session: Session, category_name: str):
     stmt = select(models.Feed).join(models.Category).filter(models.Category.name == category_name)
     return session.scalars(stmt).all()
 
+def delete_category(session: Session, category_id: int):
+    stmt = select(models.Category).filter(models.Category.id == category_id)
+    category = session.scalars(stmt).one()
+    session.delete(category)
+
 
 def add_article(
     db: Session,
@@ -129,6 +134,10 @@ def add_feed(db: Session, feed_url: str, site_url: str, title: str, description:
     db.add(feed)
     return feed
 
+def get_feeds_by_category_id(db: Session, category_id: int):
+    stmt = select(models.Feed).filter(models.Feed.category_id == category_id)
+    return db.scalars(stmt).all()
+
 def add_category(db: Session, name: str, description: str, order_number: int):
     category = models.Category(name=name, description=description, order_number=order_number)
     db.add(category)
@@ -136,6 +145,10 @@ def add_category(db: Session, name: str, description: str, order_number: int):
 
 def get_category_by_name(db: Session, name: str):
     stmt = select(models.Category).filter(models.Category.name == name)
+    return db.scalars(stmt).one_or_none()
+
+def get_category_by_id(db: Session, category_id: int):
+    stmt = select(models.Category).filter(models.Category.id == category_id)
     return db.scalars(stmt).one_or_none()
 
 def add_feed_to_category(db: Session, feed_id: int, category: models.Category):

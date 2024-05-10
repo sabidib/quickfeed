@@ -30,6 +30,17 @@ def feed_page_category(
     ):
     return feed_page(request, category=category, page=page, per_page=per_page)
 
+def get_all_categories(session):
+    return [
+        {
+            "id": category.id,
+            "name": category.name,
+            "description": category.description,
+            "order_number": category.order_number
+        }
+        for category in api.get_categories(session)
+    ]
+
 
 def feed_page(request: Request,
               category: T.Optional[str] = None,
@@ -248,7 +259,7 @@ def add_feed_post(request: Request, uri: T.Annotated[str, Form()], category: T.A
 
 
 @router.get("/feeds", response_class=HTMLResponse)
-def feeds_page(request: Request):
+def feeds_page(request: Request, error: T.Optional[str] = None, success: T.Optional[str] = None):
     with request.app.state.sesion_maker() as session:
         feeds = [
             {
@@ -266,6 +277,9 @@ def feeds_page(request: Request):
         request=request,
         name="feeds.html",
         context={
+            "categories": get_all_categories(session),
+            "error": error,
+            "success": success,
             "sidebar": get_sidebar_data(session),
             "feeds": feeds
         }
@@ -273,7 +287,7 @@ def feeds_page(request: Request):
 
 
 @router.get("/feed_details", response_class=HTMLResponse)
-def feed_details(request: Request, feed_id: str):
+def feed_details(request: Request, feed_id: str, error: T.Optional[str] = None, success: T.Optional[str] = None):
     with request.app.state.sesion_maker() as session:
         feed = api.get_feed_by_id(session, feed_id)
         feeds = [
@@ -303,6 +317,7 @@ def feed_details(request: Request, feed_id: str):
                 request=request,
                 name="feed_details.html",
                 context={
+                    "categories": get_all_categories(session),
                     "feed": {
                         "title": feed.title,
                         "site_url": feed.site_url,
@@ -315,6 +330,8 @@ def feed_details(request: Request, feed_id: str):
                     },
                     "feeds": feeds,
                     "articles": articles,
+                    "error": error,
+                    "success": success,
                     "sidebar": get_sidebar_data(session)
                 }
             )
@@ -324,10 +341,210 @@ def feed_details(request: Request, feed_id: str):
                 name="feed_details.html",
                 context={
                     "sidebar": get_sidebar_data(session),
+                    "error": error,
+                    "success": success,
                     "feed": None,
                     "feeds": feeds,
                     "articles": []
                 }
             )
+
+# Add category page
+@router.get("/add_category", response_class=HTMLResponse)
+def add_category_get(request: Request, success: T.Optional[str] = None, error: T.Optional[str] = None):
+    with request.app.state.sesion_maker() as session:
+        return request.app.state.templates.TemplateResponse(
+            request=request,
+            name="add_category.html",
+            context={
+                "sidebar": get_sidebar_data(session),
+                "success": success,
+                "error": error
+            }
+        )
+
+@router.post("/add_category", response_class=HTMLResponse)
+async def add_category_post(request: Request):
+    form_data = await request.form()
+    category_name = form_data.get("category_name")
+    category_description = form_data.get("category_description")
+    category_order_number = form_data.get("category_order_number")
+    with request.app.state.sesion_maker() as session:
+        if api.get_category_by_name(session, category_name):
+            # redirect to the same page with error message
+            message = f"Category with name {category_name} already exists"
+            return RedirectResponse(
+                url=f"/add_category?error={message}",
+                status_code=303,
+            )
+        api.add_category(session, category_name, category_description, category_order_number)
+        session.commit()
+        message = f"Category {category_name} added successfully"
+        return RedirectResponse(
+            url=f"/add_category?success={message}",
+            status_code=303,
+        )
+
+
+@router.get("/categories", response_class=HTMLResponse)
+def categories_page(request: Request):
+    with request.app.state.sesion_maker() as session:
+        categories = get_all_categories(session)
+        return request.app.state.templates.TemplateResponse(
+            request=request,
+            name="categories.html",
+            context={
+                "sidebar": get_sidebar_data(session),
+                "categories": categories
+            }
+        )
+
+@router.get("/category_details", response_class=HTMLResponse)
+def category_details(request: Request, category_id: str, error: T.Optional[str] = None, success: T.Optional[str] = None):
+    with request.app.state.sesion_maker() as session:
+        category = api.get_category_by_id(session, category_id)
+        feeds = [
+            {
+                "title": feed.title,
+                "site_url": feed.site_url,
+                "feed_url": feed.feed_url,
+                "feed_last_updated": feed.feed_last_updated,
+                "description": feed.description,
+                "category": feed.category.name if feed.category else None,
+                "id": feed.id
+            }
+            for feed in sorted(api.get_feeds_by_category_id(session, category_id), key=lambda x: x.title)
+        ]
+        return request.app.state.templates.TemplateResponse(
+            request=request,
+            name="category_details.html",
+            context={
+                "category": category,
+                "feeds": feeds,
+                "error": error,
+                "success": success,
+                "sidebar": get_sidebar_data(session)
+            }
+        )
+
+@router.get("/delete_category")
+def delete_category_get(request: Request, category_id: T.Optional[int] = None, success: T.Optional[str] = None, error: T.Optional[str] = None):
+    with request.app.state.sesion_maker() as session:
+        category = api.get_category_by_id(session, category_id)
+        return request.app.state.templates.TemplateResponse(
+            request=request,
+            name="delete_category.html",
+            context={
+                "sidebar": get_sidebar_data(session),
+                "success": success,
+                "error": error,
+                "category": category
+            }
+        )
+
+@router.post("/delete_category_process")
+def delete_category(request: Request, category_id: T.Annotated[str, Form()]):
+    with request.app.state.sesion_maker() as session:
+        category = api.get_category_by_id(session, category_id)
+        if not category:
+            message = "Category not found"
+            return RedirectResponse(
+                url=f"/categories?error={message}",
+                status_code=303,
+            )
+
+        feeds = api.get_feeds_by_category_id(session, category_id)
+        default_category = api.get_default_category(session)
+        for feed in feeds:
+            feed.category = default_category
+
+        session.delete(category)
+        message = "Category deleted successfully"
+        session.commit()
+        return RedirectResponse(
+            url=f"/categories?success={message}",
+            status_code=303,
+        )
+
+
+
+@router.post("/update_feeds")
+async def update_feeds(request: Request):
+    with request.app.state.sesion_maker() as session:
+        form_data = await request.form()
+        for category_feed_key in form_data.keys():
+            if category_feed_key.startswith("category_"):
+                feed_id = category_feed_key.split("_")
+                if len(feed_id) != 3:
+                    error = "Invalid form data"
+                    return RedirectResponse(url=f"/feeds?error={error}", status_code=303)
+                feed_id = feed_id[2]
+                if not feed_id.isdigit():
+                    error = "Invalid form data"
+                    return RedirectResponse(url=f"/feeds?error={error}", status_code=303)
+                feed_id = int(feed_id)
+                category_id = form_data.get(category_feed_key)
+                feed = api.get_feed_by_id(session, feed_id)
+                if feed is not None and feed.category_id != category_id:
+                    category = api.get_category_by_id(session, category_id)
+                    if category is None:
+                        error = "Category not found: {category_id}"
+                        return RedirectResponse(url=f"/feeds?error={error}", status_code=303)
+                    feed.category = category
+                    session.add(feed)
+        session.commit()
+        success = "Feeds updated successfully"
+        return RedirectResponse(url=f"/feeds?success={success}", status_code=303)
+
+
+
+
+@router.post("/update_feed")
+async def update_feed(request: Request):
+    with request.app.state.sesion_maker() as session:
+        form_data = await request.form()
+        feed_id = form_data.get("feed_id")
+        category_id = form_data.get("category_id")
+        feed = api.get_feed_by_id(session, feed_id)
+        if feed is None:
+            error = "Feed not found"
+            return RedirectResponse(url=f"/feed_details?error={error}", status_code=303)
+        if category_id:
+            category = api.get_category_by_id(session, category_id)
+            if category is None:
+                error = "Category not found"
+                return RedirectResponse(url=f"/feed_details?feed_id={feed_id}&error={error}", status_code=303)
+            feed.category = category
+            session.add(feed)
+            session.commit()
+        success = "Feed updated successfully"
+        return RedirectResponse(url=f"/feed_details?feed_id={feed_id}&success={success}", status_code=303)
+
+
+@router.post("/update_category")
+async def update_category(request: Request):
+    form_data = await request.form()
+
+    category_id = form_data.get("category_id")
+    category_name = form_data.get("name")
+    if not category_name:
+        error = "Category name cannot be empty"
+        return RedirectResponse(url=f"/category_details?category_id={category_id}&error={error}", status_code=303)
+    category_description = form_data.get("description")
+    category_order_number = form_data.get("order_number")
+
+    with request.app.state.sesion_maker() as session:
+        category = api.get_category_by_id(session, category_id)
+        if category is None:
+            error = "Category not found"
+            return RedirectResponse(url=f"/category_details?category_id={category_id}&error={error}", status_code=303)
+        category.name = category_name
+        category.description = category_description
+        category.order_number = category_order_number
+        session.add(category)
+        session.commit()
+        success = "Category updated successfully"
+        return RedirectResponse(url=f"/category_details?category_id={category_id}&success={success}", status_code=303)
+
 
 
