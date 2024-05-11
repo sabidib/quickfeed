@@ -11,7 +11,7 @@
             <div class="col">
                 <div class="row">
                     <div class="col">
-                        <a href="/feed" class="no-highlight-link"><h2>Articles | {{ category }}</h2></a>
+                        <a href="/feed" class="no-highlight-link"><h2>Articles | {{ category }} {% if list_name %} | {{ list_name }} {% endif %}</h2></a>
                     </div>
                     <div class="col-1">
                         <a href="/reload_feed" class="no-highlight-link"><h2>↻</h2></a>
@@ -24,6 +24,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Title</th>
+                                    <th scope="col" style="width: 5%;">Bookmark</th>
                                     <th scope="col" style="width: 15%;">Published Date</th>
                                     <th scope="col" style="width: 15%;">Feed Name</th>
                                 </tr>
@@ -36,6 +37,12 @@
                                         <a href="/redirect?article_id={{ article.id }}&url={{ article.link }}">
                                             <span>{{ article.title | truncate(70) }}</span>
                                         </a>
+                                    </td>
+                                    <td>
+                                        <form action="/bookmark" method="post">
+                                            <input type="hidden" name="article_id" value="{{ article.id }}">
+                                            <button class="star-button {% if article.bookmarked %}bookmarked{% endif %}" type="submit" name="bookmark" value="star">&#9733;</button>
+                                        </form>
                                     </td>
                                     <td>
                                         <span>{{ article.published_at.strftime('%Y-%m-%d') }}</span>

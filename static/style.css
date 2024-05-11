@@ -17,3 +17,38 @@
 .per-page-input {
   width: 4em;
 }
+/* Basic Reset for Button */
+button.star-button {
+    font-size: 24px;             /* Adjust size of the star */
+    border: none;                /* Remove borders */
+    background: transparent;     /* No background */
+    cursor: pointer;             /* Cursor appears as a pointer */
+    padding: 0;                  /* No padding */
+    margin: 0;                   /* No margins */
+    color: #ccc;                 /* Default star color - light gray */
+    transition: color 0.2s, transform 0.2s; /* Smooth transition for color and press effect */
+    outline: none;               /* Remove outline to avoid default focus styles */
+    -webkit-appearance: none;    /* Remove platform-specific styling */
+    appearance: none;            /* Remove platform-specific styling */
+    text-decoration: none;       /* No text decoration */
+}
+
+/* Class for a bookmarked item */
+button.star-button.bookmarked {
+    color: #f0c040;              /* Gold color indicating the item is bookmarked */
+}
+
+/* Hover Effect */
+button.star-button:hover {
+    color: #f0c040;              /* Color of star when hovered - gold */
+}
+
+/* Simulate a 'pressed' effect on active */
+button.star-button:active {
+    transform: scale(0.95);      /* Slightly scale down when the button is pressed */
+}
+
+/* Focus Effect - optional, for accessibility */
+button.star-button:focus {
+    color: #f0c040;              /* Maintain color on focus */
+}

@@ -79,6 +79,10 @@ def add_article(
     db.commit()
     return article
 
+def get_article_by_id(db: Session, article_id: str):
+    stmt = select(models.Article).filter(models.Article.id == article_id)
+    return db.scalars(stmt).one_or_none()
+
 
 def get_article(db: Session, feed_id: int, unique_id: str):
     stmt = select(
@@ -168,3 +172,25 @@ def remove_feed(db: Session, feed_id: int):
 def get_categories(db: Session):
     stmt = select(models.Category)
     return db.scalars(stmt).all()
+
+def get_bookmark_list(db: Session):
+    stmt = select(models.List).filter(models.List.name == 'Bookmarks')
+    return db.scalars(stmt).one_or_none()
+
+def get_article_in_list(db: Session, list_id: int, article_id: str):
+    stmt = select(models.ArticleList).filter(models.ArticleList.article_id == article_id).filter(models.ArticleList.list_id == list_id)
+    return db.scalars(stmt).one_or_none()
+
+def add_article_to_list(db: Session, list_id: int, article_id: str):
+    article_list = models.ArticleList(article_id=article_id, list_id=list_id)
+    db.add(article_list)
+    db.commit()
+    return article_list
+
+def get_articles_in_list(db: Session, list_id: int):
+    stmt = select(models.ArticleList).filter(models.ArticleList.list_id == list_id)
+    return db.scalars(stmt).all()
+
+def get_list(db: Session, list_id: int):
+    stmt = select(models.List).filter(models.List.id == list_id)
+    return db.scalars(stmt).one_or_none()

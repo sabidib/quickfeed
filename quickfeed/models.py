@@ -12,6 +12,18 @@ class ModelMixin(Base):
     updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
 
+class List(ModelMixin):
+    __tablename__ = 'list'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    description = Column(String, nullable=False)
+    order_number = Column(Integer, nullable=False)
+
+class ArticleList(ModelMixin):
+    __tablename__ = 'article_list'
+    article_id = Column(Integer, ForeignKey('article.id'), primary_key=True)
+    list_id = Column(Integer, ForeignKey('list.id'), primary_key=True)
+
 class Category(ModelMixin):
     __tablename__ = 'category'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -46,3 +58,6 @@ class Article(ModelMixin):
     published_at = Column(DateTime, nullable=False)
     added_at = Column(DateTime, nullable=False)
     feed = relationship('Feed', backref='articles')
+
+
+

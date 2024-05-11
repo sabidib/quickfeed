@@ -1,13 +1,41 @@
 import typing as T
 import heapq
 
-from fastapi import APIRouter, BackgroundTasks, Form, Request
+from fastapi import APIRouter, BackgroundTasks, Form, Request, Header
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from urllib.parse import urlparse, urljoin
+from os.path import normpath
 
 from quickfeed import api, jobs
 
 router = APIRouter()
 
+VALID_REDIRECT_PATHS = [
+    "/feed",
+    "/feeds",
+    "/bookmarks"
+]
+def valid_redirect(path: str):
+    # Normalize and clean the path to prevent directory traversal
+    parsed_url = urlparse(path)  # Parse the path to handle any query or fragments
+    normalized_path = normpath(parsed_url.path)  # Normalize the path to resolve '..' and '.'
+
+    # Ensure the path is not using any URL encoding to disguise malicious paths
+    try:
+        normalized_path = bytes(normalized_path, "utf-8").decode("utf-8")
+    except UnicodeDecodeError:
+        return False
+
+    # Check if the normalized path is exactly one of the valid paths
+    if normalized_path in VALID_REDIRECT_PATHS:
+        return True
+
+    # Check if the path starts with '/feed/' to match subdirectories under '/feed/'
+    if normalized_path.startswith("/feed/"):
+        return True
+
+    # Fallback to False if none of the conditions are met
+    return False
 
 @router.get("/")
 def root():
@@ -44,6 +72,7 @@ def get_all_categories(session):
 
 def feed_page(request: Request,
               category: T.Optional[str] = None,
+              list_id: T.Optional[int] = None,
               page: T.Optional[int] = 1,
               per_page: T.Optional[int] = 15):
     with request.app.state.sesion_maker() as session:
@@ -56,6 +85,22 @@ def feed_page(request: Request,
         for feed in article_feeds:
             article_models.extend(feed.articles)
 
+        list_model = None
+        if list_id is not None:
+            list_model = api.get_list(session, list_id)
+            if list_model is None:
+                error = "List not found"
+                return RedirectResponse(url=f"/feed&error={error}", status_code=303)
+            articles_in_list = api.get_articles_in_list(session, list_id)
+            articles_ids_in_list = {article.article_id for article in articles_in_list}
+            article_models = [article for article in article_models if article.id in articles_ids_in_list]
+
+        bookmarked_ids = set()
+        bookmark_list = api.get_bookmark_list(session)
+        if bookmark_list:
+            bookmarked_articles = api.get_articles_in_list(session, bookmark_list.id)
+            bookmarked_ids = {article.article_id for article in bookmarked_articles}
+
         articles = [
             {
                 "title": article.title,
@@ -64,15 +109,19 @@ def feed_page(request: Request,
                 "feed_name": article.feed.title,
                 "read_at": article.read_at,
                 "id": article.id,
+                "bookmarked": article.id in bookmarked_ids
             }
             for article in api.sort_articles(article_models)
         ]
+        # Get favorites in bookmarks list
+
         last_updated_feed = api.get_last_updated(session)
         return request.app.state.templates.TemplateResponse(
             request=request,
             name="index.html",
             context={
                 "category": category if category else "All",
+                "list_name": list_model.name if list_model else None,
                 "page": page,
                 "per_page": per_page,
                 "total_pages": len(articles) // per_page,
@@ -104,7 +153,6 @@ def get_sidebar_data(session):
             categories[feed["category"]] = []
         categories[feed["category"]].append(feed)
 
-    # import pdb; pdb.set_trace()
     categories = sorted(
         categories.items(),
         key=lambda x: (x[1][0]["category_order_number"], x[1][0]["category"])
@@ -547,4 +595,48 @@ async def update_category(request: Request):
         return RedirectResponse(url=f"/category_details?category_id={category_id}&success={success}", status_code=303)
 
 
+@router.post("/bookmark")
+async def bookmark(request: Request, referer: str = Header(None)):
+    with request.app.state.sesion_maker() as session:
+        form_data = await request.form()
+        article_id = form_data.get("article_id")
+        article = api.get_article_by_id(session, article_id)
+        if article is None:
+            error = "Article not found"
+            return RedirectResponse(url="/feed?error={error}", status_code=303)
+        bookmark_list = api.get_bookmark_list(session)
+        if bookmark_list is None:
+            error = "Bookmark list not found. Internal error."
+            return RedirectResponse(url="/feed?error={error}", status_code=303)
+        article_list = api.get_article_in_list(session, bookmark_list.id, article.id)
+        if article_list is None:
+            # Add to favorites list
+            article_list = api.add_article_to_list(session, bookmark_list.id, article.id)
+        else:
+            # Remove from favorites list
+            session.delete(article_list)
+
+        session.commit()
+        if referer:
+            referer_parsed = urlparse(referer)
+            if not valid_redirect(referer_parsed.path):
+                redirect_path = "/feed"
+            else:
+                redirect_path = referer_parsed.path
+        else:
+            redirect_path = "/feed"
+
+        return RedirectResponse(url=redirect_path, status_code=303)
+
+@router.get("/bookmarks", response_class=HTMLResponse)
+def bookmarks_page(request: Request,
+                   page: T.Optional[int] = 1,
+                   per_page: T.Optional[int] = 15
+    ):
+    with request.app.state.sesion_maker() as session:
+        bookmark_list = api.get_bookmark_list(session)
+        return feed_page(request,
+                         page=page,
+                         per_page=per_page,
+                         list_id=bookmark_list.id)
 
