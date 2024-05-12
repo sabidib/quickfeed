@@ -44,7 +44,7 @@ def get_config(path: str) -> dict:
     return config
 
 
-def configure_logging(config: dict):
+def configure_logging(config: dict): # pylint: disable=unused-argument
     logger = logging.getLogger("quickfeed")
     logger.setLevel(level=logging.DEBUG)
 
