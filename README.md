@@ -41,4 +41,10 @@ poetry run python quickfeed/run_server.py
 You can adjust configurations in `config.json`.
 
 
+The site will be available at `http://localhost:8000`.
+
+
+You can add feeds by pressing the `+` button on the sidebar next to `Feeds`.
+
+
 

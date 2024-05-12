@@ -6,5 +6,7 @@
   },
   "reload_time_after_new_feed_submit": 3,
   "host": "127.0.0.1",
-  "port": 8000
+  "port": 8000,
+  "ssl_keyfile": null,
+  "ssl_certfile": null
 }
