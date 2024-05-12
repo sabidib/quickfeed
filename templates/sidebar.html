@@ -5,16 +5,13 @@
         </div>
         <div class="row">
             <div class="col">
-                <h4><a href="/feeds" class="no-highlight-link">All Feeds</a></h4>
-            </div>
-            <div class="col-1">
-                <h4><a href="/add_feed" class="no-highlight-link">+</a></h4>
+                <h4><a href="/feed" class="no-highlight-link">All</a></h4>
             </div>
         </div>
         <div class="row">
             <div class="container">
                 {% for category_name, category_feeds in sidebar.feeds_by_category %}
-                    <div class="row">
+                    <div class="mt-1 row">
                         <div class="col">
                             <a href="/feed/{{ category_name }}" class="no-highlight-link">
                                 <h4>{{ category_name }}</h4>
@@ -49,16 +46,26 @@
                     <div class="container">
                         <div class="row">
                             <div class="col">
+                                <a href="/feeds" class="no-highlight-link">
+                                    <h5>Feeds</h5>
+                                </a>
+                            </div>
+                            <div class="col-1">
+                                <h5><a href="/add_feed" class="no-highlight-link">+</a></h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-1 pt-2 border-top border-bottom">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col">
                                 <a href="/categories" class="no-highlight-link">
                                     <h5>Categories</h5>
                                 </a>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <a href="/add_category" class="no-highlight-link">
-                                    <p>Add Category</p>
-                                </a>
+                            <div class="col-1">
+                                <h5><a href="/add_category" class="no-highlight-link">+</a></h5>
                             </div>
                         </div>
                     </div>

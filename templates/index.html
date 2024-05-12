@@ -24,9 +24,10 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Title</th>
-                                    <th scope="col" style="width: 5%;">Bookmark</th>
-                                    <th scope="col" style="width: 15%;">Published Date</th>
-                                    <th scope="col" style="width: 15%;">Feed Name</th>
+                                    <th scope="col" style="width: 5%;"></th>
+                                    <th scope="col" style="width: 5%;">Category</th>
+                                    <th scope="col" style="width: 11%;">Published</th>
+                                    <th scope="col" style="width: 19%;">Feed</th>
                                 </tr>
                             </thead>
                             <!-- Table Body -->
@@ -45,10 +46,17 @@
                                         </form>
                                     </td>
                                     <td>
+                                        <span>{{ article.category }}</span>
+                                    </td>
+                                    <td>
                                         <span>{{ article.published_at.strftime('%Y-%m-%d') }}</span>
                                     </td>
                                     <td>
-                                        <span>{{ article.feed_name }}</span>
+                                        <span>
+                                            <a href="/feed_details?feed_id={{ article.feed_id }}">
+                                                {{ article.feed_name }}
+                                            </a>
+                                        </span>
                                     </td>
                                 </tr>
                                 {% endfor %}

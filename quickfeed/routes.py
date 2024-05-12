@@ -159,8 +159,10 @@ def feed_page(
                 "link": article.link,
                 "published_at": article.published_at,
                 "feed_name": article.feed.title,
+                "category": article.feed.category.name if article.feed.category else None,
                 "read_at": article.read_at,
                 "id": article.id,
+                "feed_id": article.feed.id,
                 "bookmarked": article.id in bookmarked_ids
             }
             for article in api.sort_articles(article_models)
