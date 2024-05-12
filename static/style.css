@@ -19,7 +19,7 @@
 }
 /* Basic Reset for Button */
 button.star-button {
-    font-size: 24px;             /* Adjust size of the star */
+    /* font-size: 24px;             /1* Adjust size of the star *1/ */
     border: none;                /* Remove borders */
     background: transparent;     /* No background */
     cursor: pointer;             /* Cursor appears as a pointer */

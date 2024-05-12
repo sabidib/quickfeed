@@ -15,27 +15,43 @@ VALID_REDIRECT_PATHS = [
     "/feeds",
     "/bookmarks"
 ]
-def valid_redirect(path: str):
-    # Normalize and clean the path to prevent directory traversal
-    parsed_url = urlparse(path)  # Parse the path to handle any query or fragments
+DEFAULT_REDIRECT_PATH = "/feeds"
+
+def construct_redirect_url(path: str, query: str) -> str:
+    """Constructs the redirect URL from path and query string."""
+    if query:
+        return f"{path}?{query}"
+    else:
+        return path
+
+def valid_redirect(url: str) -> str:
+    # Parse the URL to separate components
+    parsed_url = urlparse(url)
     normalized_path = normpath(parsed_url.path)  # Normalize the path to resolve '..' and '.'
 
     # Ensure the path is not using any URL encoding to disguise malicious paths
     try:
         normalized_path = bytes(normalized_path, "utf-8").decode("utf-8")
     except UnicodeDecodeError:
-        return False
+        return '/'  # Return a default path if decoding fails
 
     # Check if the normalized path is exactly one of the valid paths
     if normalized_path in VALID_REDIRECT_PATHS:
-        return True
-
+        # Construct the redirect URL with query parameters
+        return construct_redirect_url(normalized_path, parsed_url.query)
+    
     # Check if the path starts with '/feed/' to match subdirectories under '/feed/'
     if normalized_path.startswith("/feed/"):
-        return True
+        # Construct the redirect URL with query parameters
+        return construct_redirect_url(normalized_path, parsed_url.query)
 
-    # Fallback to False if none of the conditions are met
-    return False
+    # If path is '/feed' but not in '/feeds', accept sub-paths
+    if normalized_path.startswith("/feed"):
+        # Optional: Validate the sub-path or other conditions here
+        return construct_redirect_url(normalized_path, parsed_url.query)
+
+    # Fallback if no valid path is found
+    return DEFAULT_REDIRECT_PATH
 
 @router.get("/")
 def root():
@@ -195,6 +211,7 @@ def redirect(request: Request, background_tasks: BackgroundTasks, article_id: st
     def update_read(article_id: str):
         with request.app.state.sesion_maker() as session:
             api.update_read(session, article_id)
+            session.commit()
     background_tasks.add_task(update_read, article_id)
     return RedirectResponse(url)
 
@@ -617,16 +634,7 @@ async def bookmark(request: Request, referer: str = Header(None)):
             session.delete(article_list)
 
         session.commit()
-        if referer:
-            referer_parsed = urlparse(referer)
-            if not valid_redirect(referer_parsed.path):
-                redirect_path = "/feed"
-            else:
-                redirect_path = referer_parsed.path
-        else:
-            redirect_path = "/feed"
-
-        return RedirectResponse(url=redirect_path, status_code=303)
+        return RedirectResponse(url=valid_redirect(referer) , status_code=303)
 
 @router.get("/bookmarks", response_class=HTMLResponse)
 def bookmarks_page(request: Request,
