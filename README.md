@@ -2,19 +2,22 @@
 
 ## What is this?
 
-QuickFeed is a super fast HTML only RSS/ATOM reader. Uses FastAPI and Sqlite server side.
+QuickFeed is a super fast HTML only RSS/ATOM reader. Uses FastAPI and sqlalchemy server side.
 
 ### Features
-- Feed subscription
+- Feed subscription.
+- Manual categories for feeds.
+- Starring articles.
 - Periodic background and on-demand feed fetching.
-- Articles marked as read when followed.
+- Articles marked as read when opened.
+- Configurable basic auth.
+- Uses SQLAlchemy so most databases can be used as a backend.
 
 ## Why?
 
+I wanted a dead simple RSS feed reader akin to early Google Reader that could be fast enough to be a homepage without caching.
 
-1. I wanted an RSS feed reader that could double as a homepage and load quickly when a new tab was open. I didn't find anything that could respond within realtime (less than 100ms), so I built one.
-
-2. I wanted a dead simple RSS feed akin to early google reader.
+I couldn't find one that met those requirements, so I built it.
 
 
 ## Running it
@@ -25,9 +28,14 @@ Start by installing the dependencies with:
 poetry install
 ```
 
+Set up the database:
+```
+poetry run alembic upgrade head
+```
+
 You can then launch the server with:
 ```
-poetry run scripts/run_server.py
+poetry run python quickfeed/run_server.py
 ```
 
 You can adjust configurations in `config.json`.

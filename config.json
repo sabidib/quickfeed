@@ -4,5 +4,7 @@
     "username": "admin",
     "password": "admin"
   },
-  "reload_time_after_new_feed_submit": 3
+  "reload_time_after_new_feed_submit": 3,
+  "host": "127.0.0.1",
+  "port": 8000
 }
