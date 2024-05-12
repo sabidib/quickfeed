@@ -13,7 +13,7 @@
         </div>
         <div class="row">
             <div class="container">
-                {% for category_name, category_feeds in sidebar.categories %}
+                {% for category_name, category_feeds in sidebar.feeds_by_category %}
                     <div class="row">
                         <div class="col">
                             <a href="/feed/{{ category_name }}" class="no-highlight-link">

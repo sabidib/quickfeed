@@ -1,10 +1,11 @@
 import datetime
+import logging
 import typing as T
 
 from sqlalchemy.orm import Session
 
 from quickfeed import api
-import logging
+
 logger = logging.getLogger(__name__)
 
 

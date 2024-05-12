@@ -19,10 +19,12 @@ class List(ModelMixin):
     description = Column(String, nullable=False)
     order_number = Column(Integer, nullable=False)
 
+
 class ArticleList(ModelMixin):
     __tablename__ = 'article_list'
     article_id = Column(Integer, ForeignKey('article.id'), primary_key=True)
     list_id = Column(Integer, ForeignKey('list.id'), primary_key=True)
+
 
 class Category(ModelMixin):
     __tablename__ = 'category'
@@ -58,6 +60,3 @@ class Article(ModelMixin):
     published_at = Column(DateTime, nullable=False)
     added_at = Column(DateTime, nullable=False)
     feed = relationship('Feed', backref='articles')
-
-
-

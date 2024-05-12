@@ -4,7 +4,6 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from quickfeed import models
 
 class AnsiColors:
     HEADER = '\033[95m'
@@ -16,6 +15,7 @@ class AnsiColors:
     END = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
 
 class ColorfulFormatter(logging.Formatter):
     COLORS = {

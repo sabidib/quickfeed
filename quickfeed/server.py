@@ -6,7 +6,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from quickfeed import basic_auth, jobs, routes, utils
-import logging
 
 config = utils.get_config("config.json")
 utils.configure_logging(config)
@@ -30,17 +29,17 @@ def load_config() -> None:
     SessionLocal = utils.setup_database(config['database_url'])
 
     @contextmanager
-    def sesion_maker():
+    def session_maker():
         session_maker = SessionLocal()
         try:
             yield session_maker
         finally:
             session_maker.close()
 
-    app.state.sesion_maker = sesion_maker
+    app.state.session_maker = session_maker
 
     scheduler = BackgroundScheduler()
-    scheduler.add_job(jobs.entrypoint, 'interval', minutes=5, args=[sesion_maker, jobs.update_feeds])
+    scheduler.add_job(jobs.entrypoint, 'interval', minutes=5, args=[session_maker, jobs.update_feeds])
     scheduler.start()
 
     app.state.scheduler = scheduler
